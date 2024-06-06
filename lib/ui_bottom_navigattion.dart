@@ -1,3 +1,4 @@
+import 'package:bottombar/screens/form/item_list_screen.dart';
 import 'package:bottombar/screens/fwb/fwb_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -27,6 +28,7 @@ class _UIBottomNavigationState extends State<UIBottomNavigation> {
       const AddTripsScreen(),
       const MapsScreen(),
       const FwbScreen(),
+      ItemListScreen(),
     ];
   }
 
@@ -99,6 +101,13 @@ class _UIBottomNavigationState extends State<UIBottomNavigation> {
                 ? const Icon(IconlyBold.chart)
                 : const Icon(IconlyLight.chart),
             label: 'Fwb',
+          ),
+          BottomNavigationBarItem(
+            backgroundColor: Colors.yellow,
+            icon: _selectedWidget == 3
+                ? const Icon(IconlyBold.call)
+                : const Icon(IconlyLight.call),
+            label: 'Form',
           ),
         ],
         currentIndex: _selectedWidget,
