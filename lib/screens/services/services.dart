@@ -22,6 +22,13 @@ class ApiServices {
       throw Exception('Failed to load users');
     }
   }
+
+  Future<void> deleteUser(String id) async {
+    final response = await http.delete(Uri.parse('$endpoint/$id'));
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete user');
+    }
+  }
 }
 
 final userProvider = FutureProvider<List<UserModel>>((ref) async {
