@@ -21,7 +21,7 @@ class FwbScreen extends ConsumerWidget {
       body: RefreshIndicator(
         key: refreshIndicatorKey,
         onRefresh: () async {
-          await Future<void>.delayed(const Duration(seconds: 2));
+          await Future<void>.delayed(const Duration(seconds: 1));
           ref.refresh(userProvider);
         },
         child: usersData.when(
@@ -41,10 +41,7 @@ class FwbScreen extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(20),
                         onPressed: (context) async {
                           try {
-                            // Gọi API để xóa user
                             await ApiServices().deleteUser(users[index].id!);
-                            await Future.delayed(const Duration(seconds: 1));
-
                             ref.refresh(userProvider);
                           } catch (e) {
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -88,7 +85,16 @@ class FwbScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
-        onPressed: () {},
+        onPressed: () async {
+          try {
+            await ApiServices().addUser();
+            ref.refresh(userProvider);
+          } catch (e) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Failed to add user')),
+            );
+          }
+        },
       ),
     );
   }

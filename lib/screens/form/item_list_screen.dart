@@ -11,10 +11,7 @@ class ItemListScreen extends StatefulWidget {
 }
 
 class _ItemListScreenState extends State<ItemListScreen> {
-  final List<Item> items = [
-    Item(id: '1', name: 'Item 1', description: 'This is item 1'),
-    Item(id: '2', name: 'Item 2', description: 'This is item 2'),
-  ];
+  final List<Item> items = [];
 
   void _addItem(Item item) {
     setState(() {

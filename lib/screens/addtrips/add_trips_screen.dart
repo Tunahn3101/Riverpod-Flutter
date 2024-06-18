@@ -3,15 +3,28 @@ import 'dart:io';
 import 'package:bottombar/common/app_size.dart';
 import 'package:bottombar/riverpod/input_notifier.dart';
 import 'package:bottombar/screens/addtrips/input_textfield.dart';
+import 'package:bottombar/screens/image_view/full_image_screen.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:location/location.dart';
 
+import '../map/map_screen.dart';
 import 'models/input_text_model.dart';
 
-class AddTripsScreen extends ConsumerWidget {
+class AddTripsScreen extends ConsumerStatefulWidget {
   const AddTripsScreen({super.key});
+
+  @override
+  _AddTripsScreenState createState() => _AddTripsScreenState();
+}
+
+class _AddTripsScreenState extends ConsumerState<AddTripsScreen> {
+  final nameController = TextEditingController();
+  final descriptionController = TextEditingController();
+  final locationController = TextEditingController();
+  LocationData? currentLocation;
 
   void optionPickImage(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
@@ -73,12 +86,45 @@ class AddTripsScreen extends ConsumerWidget {
     }
   }
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final nameController = TextEditingController();
-    final descriptionController = TextEditingController();
-    final locationController = TextEditingController();
+  Future<void> _getLocation() async {
+    final location = Location();
 
+    bool serviceEnabled;
+    PermissionStatus permissionGranted;
+
+    serviceEnabled = await location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await location.requestService();
+      if (!serviceEnabled) {
+        return;
+      }
+    }
+
+    permissionGranted = await location.hasPermission();
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await location.requestPermission();
+      if (permissionGranted != PermissionStatus.granted) {
+        return;
+      }
+    }
+
+    final locationData = await location.getLocation();
+    setState(() {
+      currentLocation = locationData;
+      locationController.text =
+          '${locationData.latitude}, ${locationData.longitude}';
+    });
+    // Navigate to the MapScreen
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MapScreen(currentLocation: locationData),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     const List<String> genderItems = ['Male', 'Female', 'Other'];
     String? selectedValue;
 
@@ -105,7 +151,6 @@ class AddTripsScreen extends ConsumerWidget {
       return null;
     }
 
-    // Giao diện nhập liệu và nút Add
     return Scaffold(
       body: Form(
         key: formKey,
@@ -131,17 +176,18 @@ class AddTripsScreen extends ConsumerWidget {
                 labletext: 'Location',
                 controller: locationController,
               ),
+              ElevatedButton(
+                onPressed: _getLocation,
+                child: const Text('Get Location'),
+              ),
               const SizedBox(height: 10),
               DropdownButtonFormField2<String>(
                 isExpanded: true,
                 decoration: InputDecoration(
-                  // Add Horizontal padding using menuItemStyleData.padding so it matches
-                  // the menu padding when button's width is not specified.
                   contentPadding: const EdgeInsets.symmetric(vertical: 16),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  // Add more decoration..
                 ),
                 hint: const Text(
                   'Select Your Gender',
@@ -192,8 +238,7 @@ class AddTripsScreen extends ConsumerWidget {
               const SizedBox(height: 10),
               Consumer(
                 builder: (context, ref, child) {
-                  final selectedImage =
-                      ref.watch(selectedImageProvider.state).state;
+                  final selectedImage = ref.watch(selectedImageProvider);
 
                   return selectedImage != null
                       ? Container(
@@ -204,6 +249,17 @@ class AddTripsScreen extends ConsumerWidget {
                               fit: BoxFit.cover,
                             ),
                             borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      FullImageScreen(imageFile: selectedImage),
+                                ),
+                              );
+                            },
                           ),
                         )
                       : Container(
@@ -228,7 +284,7 @@ class AddTripsScreen extends ConsumerWidget {
                 onPressed: () {
                   if (formKey.currentState!.validate()) {
                     final selectedImage =
-                        ref.read(selectedImageProvider.state).state;
+                        ref.read(selectedImageProvider.notifier).state;
                     final imagePath = selectedImage?.path;
 
                     final input = InputTextModel(
@@ -246,7 +302,7 @@ class AddTripsScreen extends ConsumerWidget {
                     nameController.clear();
                     descriptionController.clear();
                     locationController.clear();
-                    ref.read(selectedImageProvider.state).state = null;
+                    ref.read(selectedImageProvider.notifier).state = null;
 
                     // Show success message
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -256,6 +312,7 @@ class AddTripsScreen extends ConsumerWidget {
                 },
                 child: const Text('Add'),
               ),
+              const SizedBox(height: 10),
             ],
           ),
         ),

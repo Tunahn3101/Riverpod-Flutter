@@ -8,15 +8,18 @@ class InputTextField extends StatelessWidget {
     required this.labletext,
     required this.controller,
     required this.validator,
+    this.enabled = true,
   });
 
   TextEditingController controller = TextEditingController();
   final String labletext;
   String? Function(String?)? validator;
+  bool? enabled;
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      enabled: enabled,
       keyboardType: TextInputType.text,
       validator: validator,
       controller: controller,
