@@ -4,6 +4,7 @@ import 'package:bottombar/common/app_size.dart';
 import 'package:bottombar/riverpod/input_notifier.dart';
 import 'package:bottombar/screens/addtrips/input_textfield.dart';
 import 'package:bottombar/screens/image_view/full_image_screen.dart';
+import 'package:bottombar/screens/maps/google_map_page.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -313,6 +314,15 @@ class _AddTripsScreenState extends ConsumerState<AddTripsScreen> {
                 child: const Text('Add'),
               ),
               const SizedBox(height: 10),
+              ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const GoogleMapPage(),
+                        ));
+                  },
+                  child: const Text('Open google map'))
             ],
           ),
         ),
